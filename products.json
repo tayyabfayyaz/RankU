@@ -1,0 +1,37 @@
+[
+  {
+    "name": "Premium Wireless Headphones",
+    "description": "High-quality wireless headphones with noise cancellation and 30-hour battery life",
+    "category": "Electronics",
+    "target_audience": "Tech Enthusiasts",
+    "sku": "WH-1000XM4",
+  },
+  {
+    "name": "Organic Green Tea",
+    "description": "100% pure organic green tea leaves sourced from the mountains of Japan",
+    "category": "Beverages",
+    "target_audience": "Health Conscious",
+    "sku": "TEA-GRN-001",
+  },
+  {
+    "name": "Stainless Steel Water Bottle",
+    "description": "Eco-friendly insulated water bottle keeps drinks hot or cold for 24 hours",
+    "category": "Accessories",
+    "target_audience": "Fitness Enthusiasts",
+    "sku": "BTL-SS-750",
+  },
+  {
+    "name": "Yoga Mat Pro",
+    "description": "Non-slip TPE yoga mat with carrying strap, perfect for all fitness levels",
+    "category": "Fitness",
+    "target_audience": "Yoga Practitioners",
+    "sku": "YGM-TPE-PRO",
+  },
+  {
+    "name": "Bamboo Phone Stand",
+    "description": "Natural bamboo adjustable phone stand for desk or table use",
+    "category": "Office",
+    "target_audience": "Remote Workers",
+    "sku": "PST-BAM-001",
+  }
+]
