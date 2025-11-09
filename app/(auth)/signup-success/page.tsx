@@ -21,7 +21,7 @@ export default function SignupSuccessPage() {
                 Once confirmed, you&apos;ll have full access to AutoPost and can start automating your social media
                 posting.
               </p>
-              <Link href="/auth/login">
+              <Link href="/login">
                 <Button className="w-full">Back to Login</Button>
               </Link>
             </CardContent>

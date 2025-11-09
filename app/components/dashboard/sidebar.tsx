@@ -23,14 +23,14 @@ export function DashboardSidebar() {
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
-    router.push("/auth/login")
+    router.push("/login")
   }
 
   return (
     <div className="w-64 bg-sidebar border-r border-sidebar-border flex flex-col">
       {/* Logo */}
       <div className="p-6 border-b border-sidebar-border">
-        <Link href="/dashboard">
+        <Link href="/">
           <div className="flex items-center gap-2">
             <Image src="/ranku_logo_1.png" alt="Ranku Logo" width={100} height={24} />
           </div>

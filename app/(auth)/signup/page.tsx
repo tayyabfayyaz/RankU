@@ -39,7 +39,7 @@ export default function SignupPage() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${window.location.origin}/callback`,
           data: {
             first_name: firstName,
             last_name: lastName,
@@ -48,7 +48,7 @@ export default function SignupPage() {
         },
       })
       if (error) throw error
-      router.push("/auth/signup-success")
+      router.push("/signup-success")
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
     } finally {
@@ -142,7 +142,7 @@ export default function SignupPage() {
                 </div>
                 <div className="mt-4 text-center text-sm">
                   Already have an account?{" "}
-                  <Link href="/auth/login" className="text-blue-600 hover:underline font-semibold">
+                  <Link href="/login" className="text-blue-600 hover:underline font-semibold">
                     Login
                   </Link>
                 </div>

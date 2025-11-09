@@ -22,7 +22,7 @@ export function DashboardHeader({ user }: { user: User }) {
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
-    router.push("/auth/login")
+    router.push("/login")
   }
 
   const userInitials = user.email?.charAt(0).toUpperCase() || "U"
