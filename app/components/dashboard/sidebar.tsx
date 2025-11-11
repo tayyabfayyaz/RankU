@@ -55,10 +55,10 @@ export function DashboardSidebar() {
 
       {/* Create Campaign Button */}
       <div className="p-4 border-t border-sidebar-border space-y-2">
-        <Link href="/dashboard/create-campaign" className="w-full">
+        <Link href="/dashboard/campaigns" className="w-full">
           <Button className="w-full" size="sm">
             <Plus className="w-4 h-4 mr-2" />
-            New Campaign
+            Check Campaigns
           </Button>
         </Link>
       </div>

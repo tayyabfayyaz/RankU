@@ -262,7 +262,7 @@ export default function BulkUploadPage() {
               </div>
             )}
 
-            <Button onClick={() => router.push("/products")} className="w-full">
+            <Button onClick={() => router.push("dashboard/products")} className="w-full">
               View Products
             </Button>
           </CardContent>
