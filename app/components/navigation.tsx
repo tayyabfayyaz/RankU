@@ -71,6 +71,9 @@ export function Navigation() {
             <a href="/#contact" className="text-sm text-muted-foreground hover:text-foreground transition">
               Contact
             </a>
+            <a href="/documentation" className="text-sm text-muted-foreground hover:text-foreground transition">
+              Docs
+            </a>
           </div>
 
           <div className="hidden md:flex items-center gap-4">
@@ -126,6 +129,9 @@ export function Navigation() {
             </Link>
             <Link href="#contact" className="block text-sm text-muted-foreground hover:text-foreground">
               Contact
+            </Link>
+            <Link href="/documentation" className="block text-sm text-muted-foreground hover:text-foreground">
+              Docs
             </Link>
             <div className="flex gap-2 pt-4">
               {!loading && isAuthenticated ? (
