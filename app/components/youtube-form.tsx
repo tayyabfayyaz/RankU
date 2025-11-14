@@ -1,302 +1,148 @@
 "use client"
 
-import type React from "react"
 import { useState } from "react"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { AlertCircle, CheckCircle2, ArrowRight } from "lucide-react"
-
-interface YouTubeFormProps {
-  onComplete: (data: YouTubeVideoData) => void
-}
+import { AlertCircle } from 'lucide-react'
 
 export interface YouTubeVideoData {
-  videoContent: string
-  targetAudience: string
-  category: string
   videoTitle: string
-  keyPoints: string
-  videoLink: string
   videoDescription: string
+  targetAudience?: string
+  keywords?: string
 }
 
-export function YouTubeForm({ onComplete }: YouTubeFormProps) {
-  const [step, setStep] = useState(1)
-  const [formData, setFormData] = useState<YouTubeVideoData>({
-    videoContent: "",
-    targetAudience: "",
-    category: "",
-    videoTitle: "",
-    keyPoints: "",
-    videoLink: "",
-    videoDescription: "",
-  })
+interface YouTubeFormProps {
+  data: YouTubeVideoData | null
+  setData: (data: YouTubeVideoData) => void
+  onGenerate: () => void
+  isLoading: boolean
+}
+
+export function YouTubeForm({ data, setData, onGenerate, isLoading }: YouTubeFormProps) {
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const validateStep = (currentStep: number) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setData({
+      ...data || { videoTitle: "", videoDescription: "", targetAudience: "", keywords: "" },
+      [name]: value,
+    })
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: "" })
+    }
+  }
+
+  const validateForm = () => {
     const newErrors: Record<string, string> = {}
-
-    if (currentStep === 1) {
-      if (!formData.videoContent.trim()) {
-        newErrors.videoContent = "Video content description is required"
-      } else if (formData.videoContent.trim().length < 20) {
-        newErrors.videoContent = "Please provide more details about your video content (at least 20 characters)"
-      }
+    if (!data?.videoTitle?.trim()) {
+      newErrors.videoTitle = "Video title is required"
     }
-
-    if (currentStep === 2) {
-      if (!formData.targetAudience.trim()) {
-        newErrors.targetAudience = "Target audience is required"
-      } else if (formData.targetAudience.trim().length < 15) {
-        newErrors.targetAudience = "Please describe your target audience in more detail"
-      }
+    if (!data?.videoDescription?.trim()) {
+      newErrors.videoDescription = "Video description is required"
     }
-
-    if (currentStep === 3) {
-      if (!formData.videoTitle.trim()) {
-        newErrors.videoTitle = "Video title is required"
-      }
-      if (!formData.category.trim()) {
-        newErrors.category = "Video category is required"
-      }
-      if (!formData.keyPoints.trim()) {
-        newErrors.keyPoints = "Key points are required"
-      } else if (formData.keyPoints.trim().length < 20) {
-        newErrors.keyPoints = "Please provide more details about your key points"
-      }
-    }
-
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
-  const handleNext = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (validateStep(step)) {
-      setStep(step + 1)
-    }
-  }
-
-  const handlePrevious = () => {
-    setStep(step - 1)
-    setErrors({})
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!validateStep(step)) {
-      return
-    }
-
-    setIsSubmitting(true)
-    try {
-      // Simulate processing delay
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      onComplete(formData)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-    // Clear error for this field when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }))
+  const handleSubmit = () => {
+    if (validateForm()) {
+      onGenerate()
     }
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>YouTube Video SEO Optimization</CardTitle>
-        <CardDescription>
-          Step {step} of 3 - {step === 1 ? "Video Content" : step === 2 ? "Target Audience" : "Additional Details"}
-        </CardDescription>
-        <div className="w-full bg-muted rounded-full h-2 mt-4">
-          <div
-            className="bg-purple-600 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${(step / 3) * 100}%` }}
+    <Card>
+      <CardContent className="pt-6 space-y-6">
+        {/* Video Title */}
+        <div>
+          <label className="block text-sm font-semibold text-foreground mb-2">
+            Video Title <span className="text-red-600">*</span>
+          </label>
+          <input
+            type="text"
+            name="videoTitle"
+            value={data?.videoTitle || ""}
+            onChange={handleChange}
+            placeholder="Enter your YouTube video title"
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-background text-foreground ${
+              errors.videoTitle ? "border-red-500" : "border-input"
+            }`}
+            disabled={isLoading}
+          />
+          {errors.videoTitle && (
+            <p className="text-red-600 text-sm mt-1 flex items-center gap-1">
+              <AlertCircle className="h-4 w-4" />
+              {errors.videoTitle}
+            </p>
+          )}
+        </div>
+
+        {/* Video Description */}
+        <div>
+          <label className="block text-sm font-semibold text-foreground mb-2">
+            Video Description <span className="text-red-600">*</span>
+          </label>
+          <textarea
+            name="videoDescription"
+            value={data?.videoDescription || ""}
+            onChange={handleChange}
+            placeholder="Enter your video description"
+            rows={6}
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-background text-foreground resize-none ${
+              errors.videoDescription ? "border-red-500" : "border-input"
+            }`}
+            disabled={isLoading}
+          />
+          {errors.videoDescription && (
+            <p className="text-red-600 text-sm mt-1 flex items-center gap-1">
+              <AlertCircle className="h-4 w-4" />
+              {errors.videoDescription}
+            </p>
+          )}
+        </div>
+
+        {/* Target Audience */}
+        <div>
+          <label className="block text-sm font-semibold text-foreground mb-2">
+            Target Audience <span className="text-muted-foreground text-xs">(Optional)</span>
+          </label>
+          <input
+            type="text"
+            name="targetAudience"
+            value={data?.targetAudience || ""}
+            onChange={handleChange}
+            placeholder="e.g., Business professionals, Students, Tech enthusiasts"
+            className="w-full px-4 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-background text-foreground"
+            disabled={isLoading}
           />
         </div>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={step === 3 ? handleSubmit : handleNext} className="space-y-6">
-          {/* Step 1: Video Content */}
-          {step === 1 && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  What is your video about? <span className="text-red-500">*</span>
-                </label>
-                <p className="text-xs text-muted-foreground mb-3">Describe the main content and topic of your video</p>
-                <Textarea
-                  name="videoContent"
-                  placeholder="e.g., A tutorial on how to build a React application with TypeScript, covering hooks, state management, and best practices..."
-                  value={formData.videoContent}
-                  onChange={handleChange}
-                  rows={5}
-                  className={errors.videoContent ? "border-red-500" : ""}
-                />
-                {errors.videoContent && (
-                  <div className="flex items-center gap-2 text-red-500 text-sm mt-2">
-                    <AlertCircle className="w-4 h-4" />
-                    {errors.videoContent}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
 
-          {/* Step 2: Target Audience */}
-          {step === 2 && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Who is your target audience? <span className="text-red-500">*</span>
-                </label>
-                <p className="text-xs text-muted-foreground mb-3">
-                  Describe the demographics and interests of your viewers
-                </p>
-                <Textarea
-                  name="targetAudience"
-                  placeholder="e.g., Beginner to intermediate web developers interested in React, ages 18-35, working in tech or learning to code..."
-                  value={formData.targetAudience}
-                  onChange={handleChange}
-                  rows={5}
-                  className={errors.targetAudience ? "border-red-500" : ""}
-                />
-                {errors.targetAudience && (
-                  <div className="flex items-center gap-2 text-red-500 text-sm mt-2">
-                    <AlertCircle className="w-4 h-4" />
-                    {errors.targetAudience}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+        {/* Keywords */}
+        <div>
+          <label className="block text-sm font-semibold text-foreground mb-2">
+            Keywords <span className="text-muted-foreground text-xs">(Optional - comma separated)</span>
+          </label>
+          <input
+            type="text"
+            name="keywords"
+            value={data?.keywords || ""}
+            onChange={handleChange}
+            placeholder="e.g., tutorial, beginner, step-by-step"
+            className="w-full px-4 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-background text-foreground"
+            disabled={isLoading}
+          />
+        </div>
 
-          {/* Step 3: Additional Details */}
-          {step === 3 && (
-            <div className="space-y-4">
-              {/* Video Title */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Video Title <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  type="text"
-                  name="videoTitle"
-                  placeholder="Enter your video title"
-                  value={formData.videoTitle}
-                  onChange={handleChange}
-                  className={errors.videoTitle ? "border-red-500" : ""}
-                />
-                {errors.videoTitle && (
-                  <div className="flex items-center gap-2 text-red-500 text-sm mt-2">
-                    <AlertCircle className="w-4 h-4" />
-                    {errors.videoTitle}
-                  </div>
-                )}
-              </div>
-
-              {/* Category */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Video Category <span className="text-red-500">*</span>
-                </label>
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-md bg-background text-foreground ${
-                    errors.category ? "border-red-500" : "border-input"
-                  }`}
-                >
-                  <option value="">Select a category</option>
-                  <option value="education">Education</option>
-                  <option value="technology">Technology</option>
-                  <option value="entertainment">Entertainment</option>
-                  <option value="business">Business</option>
-                  <option value="lifestyle">Lifestyle</option>
-                  <option value="gaming">Gaming</option>
-                  <option value="music">Music</option>
-                  <option value="sports">Sports</option>
-                  <option value="travel">Travel</option>
-                  <option value="tutorial">Tutorial</option>
-                </select>
-                {errors.category && (
-                  <div className="flex items-center gap-2 text-red-500 text-sm mt-2">
-                    <AlertCircle className="w-4 h-4" />
-                    {errors.category}
-                  </div>
-                )}
-              </div>
-
-              {/* Key Points */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  What are the key points in your video? <span className="text-red-500">*</span>
-                </label>
-                <p className="text-xs text-muted-foreground mb-2">List the main topics covered in your video</p>
-                <Textarea
-                  name="keyPoints"
-                  placeholder="e.g., React hooks, useState, useEffect, useContext, custom hooks, performance optimization, best practices..."
-                  value={formData.keyPoints}
-                  onChange={handleChange}
-                  rows={4}
-                  className={errors.keyPoints ? "border-red-500" : ""}
-                />
-                {errors.keyPoints && (
-                  <div className="flex items-center gap-2 text-red-500 text-sm mt-2">
-                    <AlertCircle className="w-4 h-4" />
-                    {errors.keyPoints}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Navigation Buttons */}
-          <div className="flex gap-4 pt-4">
-            {step > 1 && (
-              <Button type="button" variant="outline" onClick={handlePrevious} className="flex-1 bg-transparent">
-                Previous
-              </Button>
-            )}
-            {step < 3 ? (
-              <Button type="submit" className="flex-1 bg-purple-600 hover:bg-purple-700">
-                Next <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            ) : (
-              <Button type="submit" className="flex-1 bg-purple-600 hover:bg-purple-700" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <span className="animate-spin mr-2">⏳</span>
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-4 h-4 mr-2" />
-                    Generate SEO Content
-                  </>
-                )}
-              </Button>
-            )}
-          </div>
-        </form>
+        {/* Submit Button */}
+        <Button
+          onClick={handleSubmit}
+          disabled={isLoading}
+          className="w-full bg-red-600 hover:bg-red-700 text-white"
+        >
+          {isLoading ? "Generating..." : "Generate SEO Content"}
+        </Button>
       </CardContent>
     </Card>
   )

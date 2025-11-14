@@ -6,7 +6,7 @@ import { Footer } from "@/app/components/footer"
 import { ProductUploadZone } from "@/app/components/upload-product-zone"
 import { SEOContentGenerator } from "@/app/components/seo-content-generator"
 import { YouTubeForm, type YouTubeVideoData } from "@/app/components/youtube-form"
-import { PlayCircle, Zap, Sparkles } from "lucide-react"
+import { PlayCircle, Zap, Sparkles, FileText, Tag, Target } from 'lucide-react'
 import { Card, CardContent } from "@/components/ui/card"
 
 interface ServicePageProps {
@@ -22,6 +22,8 @@ export default function ServicePage({ params }: ServicePageProps) {
     image: string
   } | null>(null)
   const [youtubeData, setYoutubeData] = useState<YouTubeVideoData | null>(null)
+  const [generatedContent, setGeneratedContent] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(false)
   const [showGenerator, setShowGenerator] = useState(false)
 
   const platformConfig = {
@@ -50,9 +52,50 @@ export default function ServicePage({ params }: ServicePageProps) {
   const config = platformConfig[params.platform as keyof typeof platformConfig] || platformConfig.website
   const isYoutube = params.platform === "youtube"
 
+  const handleYoutubeGenerate = async () => {
+    if (!youtubeData) return
+    setIsLoading(true)
+
+    try {
+      const response = await fetch("/api/generate-seo-content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          platform: "youtube",
+          videoTitle: youtubeData.videoTitle,
+          videoDescription: youtubeData.videoDescription,
+          targetAudience: youtubeData.targetAudience || "",
+          keywords: youtubeData.keywords || "",
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
+
+      const data = await response.json()
+      setGeneratedContent(data)
+      setShowGenerator(true)
+    } catch (error) {
+      console.error("Generation error:", error)
+      setGeneratedContent({
+        error: "Failed to generate content",
+        code: "GENERATION_ERROR",
+        details: error instanceof Error ? error.message : "Unknown error",
+      })
+      setShowGenerator(true)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleProductUploadComplete = async () => {
+    setShowGenerator(true)
+  }
+
   if (isYoutube) {
     return (
-      <main className="min-h-screen bg-linear-to-br from-red-50 to-background">
+      <main className="min-h-screen bg-gradient-to-br from-red-50 to-background">
         <Navigation />
 
         {/* Hero Section */}
@@ -96,11 +139,10 @@ export default function ServicePage({ params }: ServicePageProps) {
                 <div className="sticky top-24">
                   <h2 className="text-3xl font-bold text-foreground mb-8">Tell Us About Your Video</h2>
                   <YouTubeForm
-                    onComplete={(data) => {
-                      console.log("[v0] YouTube form completed with data:", data)
-                      setYoutubeData(data)
-                      setShowGenerator(true)
-                    }}
+                    data={youtubeData}
+                    setData={setYoutubeData}
+                    onGenerate={handleYoutubeGenerate}
+                    isLoading={isLoading}
                   />
                 </div>
               </div>
@@ -109,8 +151,8 @@ export default function ServicePage({ params }: ServicePageProps) {
               <div className="lg:col-span-3">
                 <h2 className="text-3xl font-bold text-foreground mb-8">Generated SEO Content</h2>
 
-                {youtubeData && showGenerator ? (
-                  <SEOContentGenerator productData={null} youtubeData={youtubeData} platform="youtube" />
+                {showGenerator && generatedContent ? (
+                  <SEOContentGenerator platform="youtube" content={generatedContent} />
                 ) : (
                   <Card className="border-2 border-dashed border-red-200 bg-red-50/30">
                     <CardContent className="pt-12 pb-12 text-center">
@@ -143,32 +185,35 @@ export default function ServicePage({ params }: ServicePageProps) {
                 {
                   title: "Optimized Title",
                   description: "SEO-friendly titles under 60 characters with primary keywords",
-                  icon: "📝",
+                  icon: FileText,
                 },
                 {
                   title: "Description",
                   description: "300-400 word SEO-optimized descriptions with natural keyword placement",
-                  icon: "📄",
+                  icon: FileText,
                 },
                 {
                   title: "Tags",
                   description: "15 strategic tags to improve discoverability and reach",
-                  icon: "🏷️",
+                  icon: Tag,
                 },
                 {
                   title: "Keywords",
                   description: "12 high-performing keywords researched for your content",
-                  icon: "🎯",
+                  icon: Target,
                 },
-              ].map((item, index) => (
-                <Card key={index} className="hover:border-red-300 transition-colors">
-                  <CardContent className="pt-6">
-                    <div className="text-3xl mb-3">{item.icon}</div>
-                    <h3 className="font-semibold text-foreground mb-2">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground">{item.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
+              ].map((item, index) => {
+                const IconComponent = item.icon
+                return (
+                  <Card key={index} className="hover:border-red-300 transition-colors">
+                    <CardContent className="pt-6">
+                      <IconComponent className="w-8 h-8 text-red-600 mb-3" />
+                      <h3 className="font-semibold text-foreground mb-2">{item.title}</h3>
+                      <p className="text-sm text-muted-foreground">{item.description}</p>
+                    </CardContent>
+                  </Card>
+                )
+              })}
             </div>
           </div>
         </section>
@@ -195,7 +240,7 @@ export default function ServicePage({ params }: ServicePageProps) {
             {/* Upload Zone */}
             <div>
               <h2 className="text-2xl font-semibold text-foreground mb-6">Step 1: Upload Your Product</h2>
-              <ProductUploadZone onProductData={setProductData} onComplete={() => setShowGenerator(true)} />
+              <ProductUploadZone onProductData={setProductData} onComplete={handleProductUploadComplete} />
             </div>
 
             {/* Content Generator */}
@@ -204,9 +249,8 @@ export default function ServicePage({ params }: ServicePageProps) {
               {productData && showGenerator ? (
                 <SEOContentGenerator
                   key={`generator-${params.platform}`}
-                  productData={productData}
-                  youtubeData={null}
                   platform={params.platform}
+                  content={generatedContent}
                 />
               ) : (
                 <div className="bg-muted rounded-lg p-8 text-center">
